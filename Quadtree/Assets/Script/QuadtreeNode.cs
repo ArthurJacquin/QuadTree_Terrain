@@ -8,7 +8,7 @@ public class QuadtreeNode<TType>
     float nodeSize; //cube
 
     QuadtreeNode<TType>[] subNodes;
-    IList<TType> value;
+    TType value;
 
     public QuadtreeNode(Vector2 pos, float s)
     {
@@ -31,34 +31,44 @@ public class QuadtreeNode<TType>
         get { return nodePosition; }
     }
 
-    public void subdivide(int depth = 0)
+    public void subdivide(Vector2 targetPos, TType value, int depth = 0)
     {
-        subNodes = new QuadtreeNode<TType>[4];
-        for (int i = 0; i < subNodes.Length; ++i)
+        var subdivIndex = Quadtree<TType>.getIndexPos(targetPos, position);
+        if (subNodes == null)
         {
-            Vector2 newPos = nodePosition;
-            if ((i & 2) == 2)
-            {
-                newPos.y -= nodeSize * 0.25f;
-            }
-            else
-            {
-                newPos.y += nodeSize * 0.25f;
-            }
+            subNodes = new QuadtreeNode<TType>[4];
 
-            if(( i & 1) == 1)
+            for (int i = 0; i < subNodes.Length; ++i)
             {
-                newPos.x += nodeSize * 0.25f;
+                Vector2 newPos = nodePosition;
+                if ((i & 2) == 2)
+                {
+                    newPos.y -= nodeSize * 0.25f;
+                }
+                else
+                {
+                    newPos.y += nodeSize * 0.25f;
+                }
+
+                if ((i & 1) == 1)
+                {
+                    newPos.x += nodeSize * 0.25f;
+                }
+                else
+                {
+                    newPos.x -= nodeSize * 0.25f;
+                }
+                subNodes[i] = new QuadtreeNode<TType>(newPos, nodeSize * 0.5f);
+                if (depth > 0 && subdivIndex == i)
+                {
+                    subNodes[i].subdivide(targetPos, value, depth - 1);
+                }
             }
-            else
-            {
-                newPos.x -= nodeSize * 0.25f;
-            }
-            subNodes[i] = new QuadtreeNode<TType>(newPos, nodeSize * 0.5f);
-            if(depth > 0)
-            {
-                subNodes[i].subdivide(depth - 1);
-            }
+        }
+
+        if(depth > 0)
+        {
+            subNodes[subdivIndex].subdivide(targetPos, value, depth - 1);
         }
     }
 

@@ -20,15 +20,20 @@ public class Quadtree<TType>
     public Quadtree(Vector2 pos, float s, int d)
     {
         node = new QuadtreeNode<TType>(pos, s);
-        node.subdivide();
+        depth = d;
     }
 
-    private int getIndexPos(Vector2 lookUpPos, Vector2 nodePos)
+    public void Insert(Vector2 pos, TType value )
+    {
+        node.subdivide(pos, value, depth);
+    }
+
+    public static int getIndexPos(Vector2 lookUpPos, Vector2 nodePos)
     {
         int index = 0;
 
         //si la position est en dessous du pivot du cube alors il est en dessous
-        index |= lookUpPos.y > nodePos.y ? 2 : 0;
+        index |= lookUpPos.y < nodePos.y ? 2 : 0;
         index |= lookUpPos.x > nodePos.x ? 1 : 0;
 
 
